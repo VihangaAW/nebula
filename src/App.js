@@ -20,6 +20,8 @@ import axios from "axios";
 const { Header, Content, Footer, Sider } = Layout;
 const messageNotification = "";
 const messageTitle = "";
+//hashArray is used to store hashes which retrived from the backend.
+var hashArray;
 
 const TreeNode = Tree.TreeNode;
 
@@ -291,6 +293,7 @@ export class App extends Component {
         // if(this.state.password=="1234"){
         var d = new Date();
         var n = d.getHours();
+        //following if conditions are used for greetings
         if (n < 12) {
           greetingMsg = "Good Morning! " + this.state.username;
         } else if (n >= 12 && n <= 13) {
@@ -315,6 +318,74 @@ export class App extends Component {
     }
     console.log("Clicked Login button");
   }
+
+  //Function which is used when user upload some flies to cloud. this will send the
+  //generated hash to backend, then database (Parameters: username, generated hash)
+  uploadHash(ausername, auploadHash) {
+    cusername = this.state.username;
+    console.log(ausername);
+    console.log(auploadHash);
+
+    axios
+      .post("http://localhost:8090/upload", {
+        username: ausername,
+        fileHash: auploadHash
+      })
+      .then(function(response) {
+        //console.log(response);
+        console.log(response.data[0].returnValue);
+        backendResponse = response.data[0].returnValue;
+        console.log(backendResponse);
+        console.log(response);
+      })
+      .catch(function(error) {
+        //console.log(error);
+        console.log(error.data[0].returnValue);
+      });
+
+    if (backendResponse == "HashUpdated") {
+      console.log("HashUpdated");
+    }
+    //  }
+    else if (backendResponse == "HashNotUpdated") {
+      console.log("HashNotUpdated");
+    }
+  }
+
+  //Function which is used to retrive hashes which belongs to the current user. (Parameters: username)
+  retriveHash(ausername) {
+    cusername = this.state.username;
+    console.log(ausername);
+
+    axios
+      .post("http://localhost:8090/retrive", {
+        username: ausername
+      })
+      .then(function(response) {
+        //console.log(response);
+        console.log(response.data[0].returnValue);
+        backendResponse = response.data[0].returnValue;
+        console.log(backendResponse);
+        console.log(response);
+      })
+      .catch(function(error) {
+        //console.log(error);
+        console.log(error.data[0].returnValue);
+      });
+
+    if (backendResponse == "HashNotRetrived") {
+      console.log("HashNotRetrived");
+    }
+    //  }
+    else if (backendResponse == "dbConnectionLost") {
+      console.log("dbConnectionLost");
+    } else {
+      console.log("retrivedHash");
+      //All the hashes will store here as a array (hashArray)
+      hashArray = backendResponse.split(",");
+    }
+  }
+
   registerUser(ausername, apassword, aemail) {
     cusername = this.state.username;
     console.log(ausername);
